@@ -1,6 +1,9 @@
 import Titulo from '@/components/Titulo';
 import Parrafo from '@/components/Parrafo';
 import Imagen from '@/components/Imagen';
+import Contador from '@/components/Contador';
+import CambiarImagen from '@/components/CambiarImagen';
+import CambiarFondo from '@/components/CambiarFondo';
 
 export default function Home() {
   return (
@@ -20,7 +23,17 @@ export default function Home() {
           fuente="Arial"
         />
 
-        <Imagen src="/escritorio.jpg" alt="Imagen de ejemplo" ancho="300" />
+        <Imagen src="/react.png" alt="Imagen de ejemplo" ancho="300" />
+        <hr />
+
+        <Contador />
+        <hr />
+
+        <CambiarImagen />
+        <hr />
+
+        <CambiarFondo />
+        <hr />
       </center>
     </main>
   );

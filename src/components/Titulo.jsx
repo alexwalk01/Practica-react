@@ -5,6 +5,8 @@ function Titulo({ texto, color, tamaño, fuente }) {
         color: color,
         fontSize: tamaño,
         fontFamily: fuente,
+        borderBottom: '2px solid #000',
+        paddingBottom: '10px',
       }}
     >
       {texto}
