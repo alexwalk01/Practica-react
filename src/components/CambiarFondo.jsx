@@ -9,7 +9,11 @@ function CambiarFondo() {
     document.body.style.backgroundColor = color ? '#1c2b2d' : '#0f172a';
   }, [color]);
 
-  return <button onClick={() => setColor(!color)}>Cambiar fondo</button>;
+  return (
+    <button style={{ color: 'white' }} onClick={() => setColor(!color)}>
+      Cambiar fondo
+    </button>
+  );
 }
 
 export default CambiarFondo;

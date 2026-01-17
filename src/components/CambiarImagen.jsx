@@ -10,7 +10,7 @@ function CambiarImagen() {
   };
 
   return (
-    <div>
+    <div style={{ color: 'white' }}>
       <img src={imagen} width="300" />
       <br />
       <button onClick={cambiarImagen}>Cambiar imagen</button>

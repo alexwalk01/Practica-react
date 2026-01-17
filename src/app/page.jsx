@@ -4,6 +4,8 @@ import Imagen from '@/components/Imagen';
 import Contador from '@/components/Contador';
 import CambiarImagen from '@/components/CambiarImagen';
 import CambiarFondo from '@/components/CambiarFondo';
+import ToastAzul from '@/components/ToastAzul';
+import ModalEjemplo from '@/components/Modal';
 
 export default function Home() {
   return (
@@ -24,16 +26,22 @@ export default function Home() {
         />
 
         <Imagen src="/react.png" alt="Imagen de ejemplo" ancho="300" />
-        <hr />
+        <hr style={{ color: 'white' }} />
 
         <Contador />
-        <hr />
+        <hr style={{ color: 'white' }} />
 
         <CambiarImagen />
-        <hr />
+        <hr style={{ color: 'white' }} />
 
         <CambiarFondo />
-        <hr />
+        <hr style={{ color: 'white' }} />
+
+        <ToastAzul />
+        <hr style={{ color: 'white' }} />
+
+        <ModalEjemplo />
+        <hr style={{ color: 'white' }} />
       </center>
     </main>
   );
