@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "nombre": "MongoDB",
+    "categorias": "Categoría 1",
+    "imagen": "/mongodb.png"
+  },
+  {
+    "id": 2,
+    "nombre": "ExpressJs",
+    "categorias": "Categoría 2",
+    "imagen": "/express.png"
+  },
+  {
+    "id": 3,
+    "nombre": "ReactJS",
+    "categorias": "Categoría 3",
+    "imagen": "/react.png"
+  },
+  {
+    "id": 4,
+    "nombre": "NodeJS",
+    "categorias": "Categoría 4",
+    "imagen": "/nodejs.png"
+  },
+  {
+    "id": 5,
+    "nombre": "Producto1",
+    "categorias": "Categoría 5",
+    "imagen": "/nextjs.png"
+  },
+  {
+    "id": 6,
+    "nombre": "Producto2",
+    "categorias": "Categoría 6",
+    "imagen": "/bootstrap.png"
+  },
+  {
+    "id": 7,
+    "nombre": "Producto3",
+    "categorias": "Categoría 7",
+    "imagen": "/reactstrap.png"
+  },
+  {
+    "id": 8,
+    "nombre": "Producto4",
+    "categorias": "Categoría 8",
+    "imagen": "/tailwindcss.png"
+  },
+  {
+    "id": 9,
+    "nombre": "Producto5",
+    "categorias": "Categoría 9",
+    "imagen": "/eslint.png"
+  },
+  {
+    "id": 10,
+    "nombre": "Producto6",
+    "categorias": "Categoría 10",
+    "imagen": "/fortawesome.png"
+  },
+  {
+    "id": 11,
+    "nombre": "Producto7",
+    "categorias": "Categoría 11",
+    "imagen": "/babel.png"
+  },
+  {
+    "id": 12,
+    "nombre": "Producto8",
+    "categorias": "Categoría 12",
+    "imagen": "/postcss.png"
+  },
+  {
+    "id": 13,
+    "nombre": "Producto9",
+    "categorias": "Categoría 13",
+    "imagen": "/tailwind-logo.png"
+  },
+  {
+    "id": 14,
+    "nombre": "Producto10",
+    "categorias": "Categoría 14",
+    "imagen": "/html5.png"
+  },
+  {
+    "id": 15,
+    "nombre": "Producto11",
+    "categorias": "Categoría 15",
+    "imagen": "/css3.png"
+  },
+  {
+    "id": 16,
+    "nombre": "Producto12",
+    "categorias": "Categoría 16",
+    "imagen": "/javascript.png"
+  },
+  {
+    "id": 17,
+    "nombre": "Producto13",
+    "categorias": "Categoría 17",
+    "imagen": "/typescript.png"
+  },
+  {
+    "id": 18,
+    "nombre": "Producto14",
+    "categorias": "Categoría 18",
+    "imagen": "/github.png"
+  },
+  {
+    "id": 19,
+    "nombre": "Producto15",
+    "categorias": "Categoría 19",
+    "imagen": "/git.png"
+  },
+  {
+    "id": 20,
+    "nombre": "Producto16",
+    "categorias": "Categoría 20",
+    "imagen": "/npm.png"
+  }
+]

@@ -1,3 +1,4 @@
+'use client';
 import Titulo from '@/components/Titulo';
 import Parrafo from '@/components/Parrafo';
 import Imagen from '@/components/Imagen';
@@ -6,6 +7,7 @@ import CambiarImagen from '@/components/CambiarImagen';
 import CambiarFondo from '@/components/CambiarFondo';
 import ToastAzul from '@/components/ToastAzul';
 import ModalEjemplo from '@/components/Modal';
+import TablaDatos from '@/components/TablaDatos';
 
 export default function Home() {
   return (
@@ -41,6 +43,9 @@ export default function Home() {
         <hr style={{ color: 'white' }} />
 
         <ModalEjemplo />
+        <hr style={{ color: 'white' }} />
+
+        <TablaDatos />
         <hr style={{ color: 'white' }} />
       </center>
     </main>
