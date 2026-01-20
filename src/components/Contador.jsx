@@ -8,7 +8,9 @@ function Contador() {
   return (
     <div style={{ color: 'white' }}>
       <p style={{ color: 'white' }}>Contador: {contador}</p>
-      <button onClick={() => setContador(contador + 1)}>Aumentar</button>
+      <button onClick={() => setContador((prevContador) => prevContador + 1)}>
+        Aumentar
+      </button>
     </div>
   );
 }

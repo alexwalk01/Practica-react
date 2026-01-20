@@ -12,6 +12,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import datos from '@/data/tablaDatos.json';
+const mapaIconos = {
+  'Categoría 1': faIgloo,
+  'Categoría 2': faImage,
+  'Categoría 3': faImagePortrait,
+  'Categoría 4': faArrowDown,
+};
 
 export default function TablaDatos() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -42,7 +48,9 @@ export default function TablaDatos() {
               <td>{item.nombre}</td>
               <td>{item.categorias}</td>
               <td>
-                <FontAwesomeIcon icon={faImage} />
+                <FontAwesomeIcon
+                  icon={mapaIconos[item.categorias] || faImage}
+                />
               </td>
               <td>
                 <Button

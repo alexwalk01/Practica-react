@@ -9,7 +9,7 @@ function ToastAzul() {
   return (
     <div>
       <Button color="primary" onClick={() => setVisible(!visible)}>
-        Mostrar Toast
+        {visible ? 'Ocultar' : 'Mostrar Toast'}
       </Button>
 
       {visible && (
