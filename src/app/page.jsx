@@ -9,6 +9,7 @@ import ToastAzul from '@/components/ToastAzul';
 import ModalEjemplo from '@/components/Modal';
 import TablaDatos from '@/components/TablaDatos';
 import FormularioRegistro from '@/formulario/page';
+import PracticasAPI from '@/apis/page';
 
 export default function Home() {
   return (
@@ -42,6 +43,9 @@ export default function Home() {
         <hr style={{ color: 'white' }} />
 
         <FormularioRegistro />
+        <hr style={{ color: 'white' }} />
+
+        <PracticasAPI />
         <hr style={{ color: 'white' }} />
       </center>
     </main>

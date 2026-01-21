@@ -16,6 +16,7 @@ import {
   Col,
   FormFeedback,
   FormText,
+  Table,
 } from 'reactstrap';
 
 export default function FormularioRegistro() {
@@ -33,8 +34,11 @@ export default function FormularioRegistro() {
   };
 
   const [form, setForm] = useState(estadoInicial);
+  const [registros, setRegistros] = useState([]);
   const [modal, setModal] = useState(false);
-  const [touched, setTouched] = useState({}); // Para saber qué campos han sido tocados
+  const [modalEditar, setModalEditar] = useState(false);
+  const [registroEditando, setRegistroEditando] = useState(null);
+  const [touched, setTouched] = useState({});
 
   // ============ FUNCIONES DE VALIDACIÓN ============
 
@@ -65,11 +69,9 @@ export default function FormularioRegistro() {
   const validarFecha = (fecha) => {
     if (!fecha) return false;
 
-    // Crear fecha seleccionada sin conversión de zona horaria
     const [año, mes, dia] = fecha.split('-');
     const fechaSeleccionada = new Date(año, mes - 1, dia);
 
-    // Crear fecha de hoy
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
@@ -94,7 +96,7 @@ export default function FormularioRegistro() {
     });
   };
 
-  const toggleModal = () => {
+  const guardarRegistro = () => {
     // Validar que todos los campos requeridos estén llenos
     const camposRequeridos = ['nombre', 'apellido', 'email', 'edad', 'fecha'];
     const camposVacios = camposRequeridos.filter(
@@ -102,10 +104,7 @@ export default function FormularioRegistro() {
     );
 
     if (camposVacios.length > 0) {
-      alert(
-        'Por favor, rellena todos los campos requeridos antes de mostrar los datos.',
-      );
-      // Marcar todos los campos como tocados para mostrar las validaciones
+      alert('Por favor, rellena todos los campos requeridos antes de guardar.');
       const allTouched = {};
       camposRequeridos.forEach((campo) => {
         allTouched[campo] = true;
@@ -128,15 +127,24 @@ export default function FormularioRegistro() {
       return;
     }
 
-    setModal(!modal);
+    // Guardar el registro con un ID único
+    const nuevoRegistro = {
+      ...form,
+      id: Date.now(),
+    };
+
+    setRegistros([...registros, nuevoRegistro]);
+    reiniciarForm();
+    alert('Registro guardado exitosamente');
   };
+
+  const toggleModal = () => setModal(!modal);
 
   const reiniciarForm = () => {
     setForm(estadoInicial);
     setTouched({});
   };
 
-  // Obtener la fecha actual en formato YYYY-MM-DD
   const obtenerFechaMinima = () => {
     const hoy = new Date();
     const año = hoy.getFullYear();
@@ -145,9 +153,8 @@ export default function FormularioRegistro() {
     return `${año}-${mes}-${dia}`;
   };
 
-  // Funciones para determinar si mostrar valid/invalid
   const mostrarValidacion = (campo, validador) => {
-    if (!touched[campo]) return {}; // No mostrar nada si no ha sido tocado
+    if (!touched[campo]) return {};
 
     const valor = form[campo];
     const esValido = validador(valor);
@@ -156,6 +163,61 @@ export default function FormularioRegistro() {
       valid: esValido,
       invalid: !esValido,
     };
+  };
+
+  // ============ FUNCIONES DE TABLA ============
+
+  const eliminarRegistro = (id) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este registro?')) {
+      setRegistros(registros.filter((registro) => registro.id !== id));
+    }
+  };
+
+  const abrirModalEditar = (registro) => {
+    setRegistroEditando(registro);
+    setForm(registro);
+    setModalEditar(true);
+  };
+
+  const cerrarModalEditar = () => {
+    setModalEditar(false);
+    setRegistroEditando(null);
+    reiniciarForm();
+  };
+
+  const guardarEdicion = () => {
+    // Validar campos
+    const camposRequeridos = ['nombre', 'apellido', 'email', 'edad', 'fecha'];
+    const camposVacios = camposRequeridos.filter(
+      (campo) => !form[campo] || form[campo].trim() === '',
+    );
+
+    if (camposVacios.length > 0) {
+      alert('Por favor, rellena todos los campos requeridos.');
+      return;
+    }
+
+    if (
+      !validarNombre(form.nombre) ||
+      !validarApellido(form.apellido) ||
+      !validarEmail(form.email) ||
+      !validarEdad(form.edad) ||
+      !validarFecha(form.fecha)
+    ) {
+      alert('Por favor, corrige los errores en el formulario.');
+      return;
+    }
+
+    // Actualizar el registro
+    const registrosActualizados = registros.map((registro) =>
+      registro.id === registroEditando.id
+        ? { ...form, id: registro.id }
+        : registro,
+    );
+
+    setRegistros(registrosActualizados);
+    cerrarModalEditar();
+    alert('Registro actualizado exitosamente');
   };
 
   return (
@@ -363,8 +425,11 @@ export default function FormularioRegistro() {
         </FormGroup>
 
         <div className="mt-4">
+          <Button color="success" className="me-2" onClick={guardarRegistro}>
+            Guardar
+          </Button>
           <Button color="primary" className="me-2" onClick={toggleModal}>
-            Mostrar
+            Mostrar JSON
           </Button>
           <Button color="secondary" onClick={reiniciarForm}>
             Reiniciar
@@ -372,14 +437,200 @@ export default function FormularioRegistro() {
         </div>
       </Form>
 
+      {/* TABLA DE REGISTROS */}
+      {registros.length > 0 && (
+        <div className="mt-5">
+          <h2 className="mb-3">Registros Guardados</h2>
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Edad</th>
+                <th>Género</th>
+                <th>Rol</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {registros.map((registro, index) => (
+                <tr key={registro.id}>
+                  <td>{index + 1}</td>
+                  <td>{registro.nombre}</td>
+                  <td>{registro.apellido}</td>
+                  <td>{registro.email}</td>
+                  <td>{registro.edad}</td>
+                  <td>{registro.genero || 'N/A'}</td>
+                  <td>{registro.rol || 'N/A'}</td>
+                  <td>{registro.fecha}</td>
+                  <td>
+                    <Button
+                      color="warning"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => abrirModalEditar(registro)}
+                      title="Editar"
+                    >
+                      Editar
+                    </Button>
+                    <Button
+                      color="danger"
+                      size="sm"
+                      onClick={() => eliminarRegistro(registro.id)}
+                      title="Eliminar"
+                    >
+                      Eliminar
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      )}
+
+      {/* MODAL PARA MOSTRAR JSON */}
       <Modal isOpen={modal} toggle={toggleModal}>
-        <ModalHeader toggle={toggleModal}>Datos Registrados</ModalHeader>
+        <ModalHeader toggle={toggleModal}>
+          Datos del Formulario (JSON)
+        </ModalHeader>
         <ModalBody>
           <pre>{JSON.stringify(form, null, 2)}</pre>
         </ModalBody>
         <ModalFooter>
           <Button color="primary" onClick={toggleModal}>
             Cerrar
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      {/* MODAL PARA EDITAR */}
+      <Modal isOpen={modalEditar} toggle={cerrarModalEditar} size="lg">
+        <ModalHeader toggle={cerrarModalEditar}>Editar Registro</ModalHeader>
+        <ModalBody>
+          <Form>
+            <Row>
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="editNombre">Nombre *</Label>
+                  <Input
+                    id="editNombre"
+                    name="nombre"
+                    value={form.nombre}
+                    onChange={handleChange}
+                    placeholder="Ej: Juan"
+                  />
+                </FormGroup>
+              </Col>
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="editApellido">Apellido *</Label>
+                  <Input
+                    id="editApellido"
+                    name="apellido"
+                    value={form.apellido}
+                    onChange={handleChange}
+                    placeholder="Ej: Pérez"
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+
+            <FormGroup>
+              <Label for="editEmail">Email *</Label>
+              <Input
+                id="editEmail"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label for="editEdad">Edad *</Label>
+              <Input
+                id="editEdad"
+                name="edad"
+                type="number"
+                value={form.edad}
+                onChange={handleChange}
+              />
+            </FormGroup>
+
+            <FormGroup tag="fieldset">
+              <Label>Género</Label>
+              <FormGroup check>
+                <Input
+                  name="genero"
+                  type="radio"
+                  checked={form.genero === 'masculino'}
+                  value="masculino"
+                  onChange={handleChange}
+                />{' '}
+                Masculino
+              </FormGroup>
+              <FormGroup check>
+                <Input
+                  name="genero"
+                  type="radio"
+                  checked={form.genero === 'femenino'}
+                  value="femenino"
+                  onChange={handleChange}
+                />{' '}
+                Femenino
+              </FormGroup>
+            </FormGroup>
+
+            <FormGroup>
+              <Label for="editRol">Rol</Label>
+              <Input
+                id="editRol"
+                type="select"
+                name="rol"
+                value={form.rol}
+                onChange={handleChange}
+              >
+                <option value="">Selecciona un rol</option>
+                <option value="Admin">Administrador</option>
+                <option value="Usuario">Usuario</option>
+              </Input>
+            </FormGroup>
+
+            <FormGroup>
+              <Label for="editFecha">Fecha de registro *</Label>
+              <Input
+                id="editFecha"
+                type="date"
+                name="fecha"
+                value={form.fecha}
+                onChange={handleChange}
+                min={obtenerFechaMinima()}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label for="editNotas">Notas</Label>
+              <Input
+                id="editNotas"
+                type="textarea"
+                name="notas"
+                value={form.notas}
+                onChange={handleChange}
+                rows="3"
+              />
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={guardarEdicion}>
+            Guardar Cambios
+          </Button>
+          <Button color="secondary" onClick={cerrarModalEditar}>
+            Cancelar
           </Button>
         </ModalFooter>
       </Modal>
