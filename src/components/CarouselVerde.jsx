@@ -1,72 +1,45 @@
 'use client';
 
-import {
-  Carousel,
-  CarouselItem,
-  CarouselControl,
-  CarouselIndicators,
-  CarouselCaption,
-} from 'reactstrap';
-import { useState } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
-const items = [
-  { src: '/mongodb.png', altText: 'Slide 1', caption: 'Imagen 1' },
-  { src: '/express.png', altText: 'Slide 2', caption: 'Imagen 2' },
-  { src: '/react.png', altText: 'Slide 3', caption: 'Imagen 3' },
-  { src: '/nodejs.png', altText: 'Slide 4', caption: 'Imagen 4' },
-];
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 export default function CarouselVerde() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [animating, setAnimating] = useState(false);
-
-  const next = () => {
-    if (animating) return;
-    const nextIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
-    setActiveIndex(nextIndex);
-  };
-
-  const previous = () => {
-    if (animating) return;
-    const nextIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1;
-    setActiveIndex(nextIndex);
-  };
-
-  const slides = items.map((item) => (
-    <CarouselItem
-      key={item.src}
-      onExiting={() => setAnimating(true)}
-      onExited={() => setAnimating(false)}
-    >
-      <img src={item.src} alt={item.altText} className="w-100" />
-      <CarouselCaption
-        captionText={item.caption}
-        captionHeader={item.caption}
-        style={{ color: 'green' }}
-      />
-    </CarouselItem>
-  ));
-
   return (
-    <Carousel activeIndex={activeIndex} next={next} previous={previous}>
-      <CarouselIndicators
-        items={items}
-        activeIndex={activeIndex}
-        onClickHandler={(newIndex) => setActiveIndex(newIndex)}
-      />
-      {slides}
-      <CarouselControl
-        direction="prev"
-        directionText="Previous"
-        onClickHandler={previous}
-        style={{ color: 'green' }}
-      />
-      <CarouselControl
-        direction="next"
-        directionText="Next"
-        onClickHandler={next}
-        style={{ color: 'green' }}
-      />
-    </Carousel>
+    <div style={{ width: '600px', margin: '0 auto' }}>
+      <Swiper
+        modules={[Navigation, Pagination, Autoplay]}
+        navigation
+        pagination={{ clickable: true }}
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: false,
+        }}
+        loop={true}
+        spaceBetween={30}
+        slidesPerView={1}
+      >
+        {[
+          { src: '/mongodb.png', alt: 'MongoDB', name: 'MongoDB' },
+          { src: '/express.png', alt: 'Express', name: 'Express' },
+          { src: '/react.png', alt: 'React', name: 'React' },
+          { src: '/nodejs.png', alt: 'Node.js', name: 'Node.js' },
+        ].map((img, index) => (
+          <SwiperSlide key={index}>
+            <div style={{ textAlign: 'center' }}>
+              <img src={img.src} alt={img.alt} width="100%" />
+              <h3
+                style={{ color: 'green', marginTop: '20px', fontSize: '24px' }}
+              >
+                {img.name}
+              </h3>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
   );
 }

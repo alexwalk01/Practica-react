@@ -1,502 +1,327 @@
-'use client';
-
 import React, { useState } from 'react';
+import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa';
 import {
   Button,
   Form,
   FormGroup,
   Label,
   Input,
-  Container,
+  FormFeedback,
   Modal,
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Container,
   Row,
   Col,
-  FormFeedback,
-  FormText,
   Table,
 } from 'reactstrap';
 
-export default function FormularioRegistro() {
-  const estadoInicial = {
+const FormularioTravel = () => {
+  const initialState = {
     nombre: '',
     apellido: '',
     email: '',
     password: '',
     edad: '',
-    genero: '',
+    genero: null,
     rol: '',
     opciones: false,
     notas: '',
     fecha: '',
   };
 
-  const [form, setForm] = useState(estadoInicial);
-  const [registros, setRegistros] = useState([]);
+  const [form, setForm] = useState(initialState);
+  const [lista, setLista] = useState([]);
   const [modal, setModal] = useState(false);
-  const [modalEditar, setModalEditar] = useState(false);
+  const [editModal, setEditModal] = useState(false);
   const [registroEditando, setRegistroEditando] = useState(null);
-  const [touched, setTouched] = useState({});
 
-  // ============ FUNCIONES DE VALIDACIÓN ============
+  // Lógica de validación (Se usa tanto para el form principal como para el de edición)
+  const getValidation = (data) => ({
+    nombre: /^[a-zA-ZÀ-ÿ\s]+$/.test(data.nombre) && data.nombre.length > 0,
+    apellido:
+      /^[a-zA-ZÀ-ÿ\s]+$/.test(data.apellido) && data.apellido.length > 0,
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email),
+    edad: Number(data.edad) > 0 && Number(data.edad) <= 100,
+    fecha: data.fecha >= new Date().toISOString().split('T')[0],
+  });
 
-  const validarNombre = (nombre) => {
-    if (!nombre || nombre.trim() === '') return false;
-    const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-    return regex.test(nombre);
+  const validate = getValidation(form);
+
+  const isFormValid = (data) => {
+    const v = getValidation(data);
+    return (
+      v.nombre &&
+      v.apellido &&
+      v.email &&
+      v.edad &&
+      v.fecha &&
+      data.password.length > 0 &&
+      data.rol !== '' &&
+      data.genero !== null
+    );
   };
-
-  const validarApellido = (apellido) => {
-    if (!apellido || apellido.trim() === '') return false;
-    const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-    return regex.test(apellido);
-  };
-
-  const validarEmail = (email) => {
-    if (!email || email.trim() === '') return false;
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
-  const validarEdad = (edad) => {
-    if (!edad || edad.trim() === '') return false;
-    const numero = parseInt(edad);
-    return !isNaN(numero) && numero > 0 && numero <= 100;
-  };
-
-  const validarFecha = (fecha) => {
-    if (!fecha) return false;
-
-    const [año, mes, dia] = fecha.split('-');
-    const fechaSeleccionada = new Date(año, mes - 1, dia);
-
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-
-    return fechaSeleccionada >= hoy;
-  };
-
-  // ============ MANEJADORES ============
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm({
-      ...form,
-      [name]: type === 'checkbox' ? checked : value,
-    });
+    setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
   };
 
-  const handleBlur = (e) => {
-    const { name } = e.target;
-    setTouched({
-      ...touched,
-      [name]: true,
-    });
+  // --- función nueva ---
+
+  const handleSave = () => {
+    setLista([...lista, { ...form, id: Date.now() }]);
+    setForm(initialState);
   };
 
-  const guardarRegistro = () => {
-    // Validar que todos los campos requeridos estén llenos
-    const camposRequeridos = ['nombre', 'apellido', 'email', 'edad', 'fecha'];
-    const camposVacios = camposRequeridos.filter(
-      (campo) => !form[campo] || form[campo].trim() === '',
+  const handleEliminar = (id) => {
+    setLista(lista.filter((item) => item.id !== id));
+  };
+
+  const abrirEdicion = (registro) => {
+    setRegistroEditando({ ...registro });
+    setEditModal(true);
+  };
+
+  const confirmarEdicion = () => {
+    setLista(
+      lista.map((item) =>
+        item.id === registroEditando.id ? registroEditando : item,
+      ),
     );
-
-    if (camposVacios.length > 0) {
-      alert('Por favor, rellena todos los campos requeridos antes de guardar.');
-      const allTouched = {};
-      camposRequeridos.forEach((campo) => {
-        allTouched[campo] = true;
-      });
-      setTouched(allTouched);
-      return;
-    }
-
-    // Validar que los campos llenos sean válidos
-    if (
-      !validarNombre(form.nombre) ||
-      !validarApellido(form.apellido) ||
-      !validarEmail(form.email) ||
-      !validarEdad(form.edad) ||
-      !validarFecha(form.fecha)
-    ) {
-      alert(
-        'Por favor, corrige los errores en el formulario antes de continuar.',
-      );
-      return;
-    }
-
-    // Guardar el registro con un ID único
-    const nuevoRegistro = {
-      ...form,
-      id: Date.now(),
-    };
-
-    setRegistros([...registros, nuevoRegistro]);
-    reiniciarForm();
-    alert('Registro guardado exitosamente');
+    setEditModal(false);
   };
 
+  const handleReset = () => setForm(initialState);
   const toggleModal = () => setModal(!modal);
 
-  const reiniciarForm = () => {
-    setForm(estadoInicial);
-    setTouched({});
-  };
-
-  const obtenerFechaMinima = () => {
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dia = String(hoy.getDate()).padStart(2, '0');
-    return `${año}-${mes}-${dia}`;
-  };
-
-  const mostrarValidacion = (campo, validador) => {
-    if (!touched[campo]) return {};
-
-    const valor = form[campo];
-    const esValido = validador(valor);
-
-    return {
-      valid: esValido,
-      invalid: !esValido,
-    };
-  };
-
-  // ============ FUNCIONES DE TABLA ============
-
-  const eliminarRegistro = (id) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este registro?')) {
-      setRegistros(registros.filter((registro) => registro.id !== id));
-    }
-  };
-
-  const abrirModalEditar = (registro) => {
-    setRegistroEditando(registro);
-    setForm(registro);
-    setModalEditar(true);
-  };
-
-  const cerrarModalEditar = () => {
-    setModalEditar(false);
-    setRegistroEditando(null);
-    reiniciarForm();
-  };
-
-  const guardarEdicion = () => {
-    // Validar campos
-    const camposRequeridos = ['nombre', 'apellido', 'email', 'edad', 'fecha'];
-    const camposVacios = camposRequeridos.filter(
-      (campo) => !form[campo] || form[campo].trim() === '',
-    );
-
-    if (camposVacios.length > 0) {
-      alert('Por favor, rellena todos los campos requeridos.');
-      return;
-    }
-
-    if (
-      !validarNombre(form.nombre) ||
-      !validarApellido(form.apellido) ||
-      !validarEmail(form.email) ||
-      !validarEdad(form.edad) ||
-      !validarFecha(form.fecha)
-    ) {
-      alert('Por favor, corrige los errores en el formulario.');
-      return;
-    }
-
-    // Actualizar el registro
-    const registrosActualizados = registros.map((registro) =>
-      registro.id === registroEditando.id
-        ? { ...form, id: registro.id }
-        : registro,
-    );
-
-    setRegistros(registrosActualizados);
-    cerrarModalEditar();
-    alert('Registro actualizado exitosamente');
-  };
-
   return (
-    <Container
-      className="bg-white p-5 rounded"
-      style={{ minHeight: '100vh', color: 'black' }}
-    >
-      <h1 className="mb-4">Formulario de Registro</h1>
+    <Container className="mt-4 p-4">
+      <div className="p-4 border rounded bg-light mb-5">
+        <h3>Formulario</h3>
+        <Form>
+          <Row>
+            <Col md={6}>
+              <FormGroup>
+                <Label>Nombre</Label>
+                <Input
+                  name="nombre"
+                  value={form.nombre}
+                  onChange={handleChange}
+                  valid={validate.nombre}
+                  invalid={form.nombre !== '' && !validate.nombre}
+                />
+                <FormFeedback>Solo letras permitidas.</FormFeedback>
+              </FormGroup>
+            </Col>
+            <Col md={6}>
+              <FormGroup>
+                <Label>Apellido</Label>
+                <Input
+                  name="apellido"
+                  value={form.apellido}
+                  onChange={handleChange}
+                  valid={validate.apellido}
+                  invalid={form.apellido !== '' && !validate.apellido}
+                />
+                <FormFeedback>Solo letras permitidas.</FormFeedback>
+              </FormGroup>
+            </Col>
+          </Row>
 
-      <Form>
-        <Row>
-          <Col md={6}>
-            <FormGroup>
-              <Label for="nombre">Nombre *</Label>
-              <Input
-                id="nombre"
-                name="nombre"
-                value={form.nombre}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Ej: Juan"
-                {...mostrarValidacion('nombre', validarNombre)}
-              />
-              <FormFeedback valid>¡Perfecto! El nombre es válido</FormFeedback>
-              <FormFeedback>
-                {!form.nombre || form.nombre.trim() === ''
-                  ? 'Por favor, rellena este campo'
-                  : 'Este campo solo acepta letras'}
-              </FormFeedback>
-              <FormText>Ingresa tu nombre completo</FormText>
-            </FormGroup>
-          </Col>
-          <Col md={6}>
-            <FormGroup>
-              <Label for="apellido">Apellido *</Label>
-              <Input
-                id="apellido"
-                name="apellido"
-                value={form.apellido}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="Ej: Pérez"
-                {...mostrarValidacion('apellido', validarApellido)}
-              />
-              <FormFeedback valid>
-                ¡Perfecto! El apellido es válido
-              </FormFeedback>
-              <FormFeedback>
-                {!form.apellido || form.apellido.trim() === ''
-                  ? 'Por favor, rellena este campo'
-                  : 'Este campo solo acepta letras'}
-              </FormFeedback>
-              <FormText>Ingresa tu apellido completo</FormText>
-            </FormGroup>
-          </Col>
-        </Row>
-
-        <FormGroup>
-          <Label for="email">Email *</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="ejemplo@correo.com"
-            {...mostrarValidacion('email', validarEmail)}
-          />
-          <FormFeedback valid>¡Excelente! El correo es válido</FormFeedback>
-          <FormFeedback>
-            {!form.email || form.email.trim() === ''
-              ? 'Por favor, rellena este campo'
-              : 'Debe tener formato de correo electrónico válido (ejemplo@dominio.com)'}
-          </FormFeedback>
-          <FormText>Usaremos este correo para contactarte</FormText>
-        </FormGroup>
-
-        <FormGroup>
-          <Label for="password">Contraseña</Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-            placeholder="••••••••"
-          />
-          <FormText>Debe tener al menos 8 caracteres</FormText>
-        </FormGroup>
-
-        <FormGroup>
-          <Label for="edad">Edad *</Label>
-          <Input
-            id="edad"
-            name="edad"
-            type="number"
-            value={form.edad}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="Ej: 25"
-            {...mostrarValidacion('edad', validarEdad)}
-          />
-          <FormFeedback valid>¡Perfecto! La edad es válida</FormFeedback>
-          <FormFeedback>
-            {!form.edad || form.edad.trim() === ''
-              ? 'Por favor, rellena este campo'
-              : 'Este campo solo acepta números positivos del 1 al 100'}
-          </FormFeedback>
-          <FormText>Debes ser mayor de edad para registrarte</FormText>
-        </FormGroup>
-
-        <FormGroup tag="fieldset">
-          <Label>Género</Label>
-          <FormGroup check>
+          <FormGroup>
+            <Label>Email</Label>
             <Input
-              id="generoMasculino"
-              name="genero"
-              type="radio"
-              checked={form.genero === 'masculino'}
-              value="masculino"
+              name="email"
+              type="email"
+              value={form.email}
               onChange={handleChange}
-            />{' '}
-            <Label check for="generoMasculino">
-              Masculino
+              valid={validate.email}
+              invalid={form.email !== '' && !validate.email}
+            />
+            <FormFeedback>Formato de correo inválido.</FormFeedback>
+          </FormGroup>
+
+          <FormGroup>
+            <Label>Contraseña</Label>
+            <Input
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+            />
+          </FormGroup>
+
+          <Row>
+            <Col md={4}>
+              <FormGroup>
+                <Label>Edad</Label>
+                <Input
+                  name="edad"
+                  type="number"
+                  value={form.edad}
+                  onChange={handleChange}
+                  valid={validate.edad}
+                  invalid={form.edad !== '' && !validate.edad}
+                />
+              </FormGroup>
+            </Col>
+            <Col md={4}>
+              <FormGroup>
+                <Label>Fecha de registro</Label>
+                <Input
+                  name="fecha"
+                  type="date"
+                  value={form.fecha}
+                  onChange={handleChange}
+                  valid={validate.fecha}
+                  invalid={form.fecha !== '' && !validate.fecha}
+                />
+              </FormGroup>
+            </Col>
+            <Col md={4}>
+              <FormGroup>
+                <Label>Rol</Label>
+                <Input
+                  name="rol"
+                  type="select"
+                  value={form.rol}
+                  onChange={handleChange}
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="Admin">Administrador</option>
+                  <option value="Agente">Agente de Ventas</option>
+                </Input>
+              </FormGroup>
+            </Col>
+          </Row>
+
+          <FormGroup tag="fieldset">
+            <Label>Género</Label>
+            <FormGroup check>
+              <Label check>
+                <Input
+                  type="radio"
+                  name="genero"
+                  value="Masculino"
+                  checked={form.genero === 'Masculino'}
+                  onChange={handleChange}
+                />{' '}
+                Masculino
+              </Label>
+            </FormGroup>
+            <FormGroup check>
+              <Label check>
+                <Input
+                  type="radio"
+                  name="genero"
+                  value="Femenino"
+                  checked={form.genero === 'Femenino'}
+                  onChange={handleChange}
+                />{' '}
+                Femenino
+              </Label>
+            </FormGroup>
+          </FormGroup>
+
+          <FormGroup check className="mb-3">
+            <Label check>
+              <Input
+                type="checkbox"
+                name="opciones"
+                checked={form.opciones}
+                onChange={handleChange}
+              />{' '}
+              Aceptar términos
             </Label>
           </FormGroup>
-          <FormGroup check>
-            <Input
-              id="generoFemenino"
-              name="genero"
-              type="radio"
-              checked={form.genero === 'femenino'}
-              value="femenino"
-              onChange={handleChange}
-            />{' '}
-            <Label check for="generoFemenino">
-              Femenino
-            </Label>
-          </FormGroup>
-        </FormGroup>
 
-        <FormGroup>
-          <Label for="rol">Rol</Label>
-          <Input
-            id="rol"
-            type="select"
-            name="rol"
-            value={form.rol}
-            onChange={handleChange}
+          <FormGroup>
+            <Label>Notas</Label>
+            <Input
+              type="textarea"
+              name="notas"
+              value={form.notas}
+              onChange={handleChange}
+            />
+          </FormGroup>
+
+          <Button
+            color="success"
+            className="me-2"
+            onClick={handleSave}
+            disabled={!isFormValid(form)}
           >
-            <option value="">Selecciona un rol</option>
-            <option value="Admin">Administrador</option>
-            <option value="Usuario">Usuario</option>
-          </Input>
-          <FormText>Selecciona el rol que mejor se adapte a ti</FormText>
-        </FormGroup>
-
-        <FormGroup check className="mb-3">
-          <Input
-            id="opciones"
-            type="checkbox"
-            name="opciones"
-            checked={form.opciones}
-            onChange={handleChange}
-          />
-          <Label check for="opciones">
-            Aceptar términos y condiciones
-          </Label>
-        </FormGroup>
-
-        <FormGroup>
-          <Label for="notas">Notas</Label>
-          <Input
-            id="notas"
-            type="textarea"
-            name="notas"
-            value={form.notas}
-            onChange={handleChange}
-            placeholder="Escribe cualquier comentario adicional..."
-            rows="4"
-          />
-          <FormText>Campo opcional para información adicional</FormText>
-        </FormGroup>
-
-        <FormGroup>
-          <Label for="fecha">Fecha de registro *</Label>
-          <Input
-            id="fecha"
-            type="date"
-            name="fecha"
-            value={form.fecha}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            min={obtenerFechaMinima()}
-            {...mostrarValidacion('fecha', validarFecha)}
-          />
-          <FormFeedback valid>¡Perfecto! La fecha es válida</FormFeedback>
-          <FormFeedback>
-            {!form.fecha
-              ? 'Por favor, rellena este campo'
-              : 'Solo se aceptan fechas a partir del día de hoy'}
-          </FormFeedback>
-          <FormText>Selecciona una fecha de registro</FormText>
-        </FormGroup>
-
-        <div className="mt-4">
-          <Button color="success" className="me-2" onClick={guardarRegistro}>
             Guardar
           </Button>
-          <Button color="primary" className="me-2" onClick={toggleModal}>
-            Mostrar JSON
+          <Button
+            color="primary"
+            className="me-2"
+            onClick={toggleModal}
+            disabled={!isFormValid(form)}
+          >
+            Mostrar
           </Button>
-          <Button color="secondary" onClick={reiniciarForm}>
+          <Button color="secondary" onClick={handleReset}>
             Reiniciar
           </Button>
-        </div>
-      </Form>
+        </Form>
+      </div>
 
-      {/* TABLA DE REGISTROS */}
-      {registros.length > 0 && (
-        <div className="mt-5">
-          <h2 className="mb-3">Registros Guardados</h2>
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Email</th>
-                <th>Edad</th>
-                <th>Género</th>
-                <th>Rol</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {registros.map((registro, index) => (
-                <tr key={registro.id}>
-                  <td>{index + 1}</td>
-                  <td>{registro.nombre}</td>
-                  <td>{registro.apellido}</td>
-                  <td>{registro.email}</td>
-                  <td>{registro.edad}</td>
-                  <td>{registro.genero || 'N/A'}</td>
-                  <td>{registro.rol || 'N/A'}</td>
-                  <td>{registro.fecha}</td>
-                  <td>
-                    <Button
-                      color="warning"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => abrirModalEditar(registro)}
-                      title="Editar"
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      color="danger"
-                      size="sm"
-                      onClick={() => eliminarRegistro(registro.id)}
-                      title="Eliminar"
-                    >
-                      Eliminar
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-      )}
+      <h4 color="primary">Registros Guardados</h4>
+      <Table striped bordered hover responsive>
+        <thead className="table-dark">
+          <tr>
+            <th>Nombre Completo</th>
+            <th>Email</th>
+            <th>Contraseña</th>
+            <th>Edad</th>
+            <th>Fecha de registro</th>
+            <th>Rol</th>
+            <th>Género</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lista.map((item) => (
+            <tr key={item.id}>
+              <td>
+                {item.nombre} {item.apellido}
+              </td>
+              <td>{item.email}</td>
+              <td>{'•'.repeat(item.password ? item.password.length : 0)}</td>
+              <td>{item.edad}</td>
+              <td>{item.fecha}</td>
+              <td>{item.rol}</td>
+              <td>{item.genero}</td>
+              <td>
+                <Button
+                  color="warning"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => abrirEdicion(item)}
+                  style={{ display: 'inline-flex', alignItems: 'center' }}
+                >
+                  <FaPencilAlt className="me-1" /> Editar
+                </Button>
 
-      {/* MODAL PARA MOSTRAR JSON */}
+                <Button
+                  color="danger"
+                  size="sm"
+                  onClick={() => handleEliminar(item.id)}
+                  style={{ display: 'inline-flex', alignItems: 'center' }}
+                >
+                  <FaTrashAlt className="me-1" /> Eliminar
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+
       <Modal isOpen={modal} toggle={toggleModal}>
-        <ModalHeader toggle={toggleModal}>
-          Datos del Formulario (JSON)
-        </ModalHeader>
+        <ModalHeader toggle={toggleModal}>Datos Registrados</ModalHeader>
         <ModalBody>
           <pre>{JSON.stringify(form, null, 2)}</pre>
         </ModalBody>
@@ -507,133 +332,136 @@ export default function FormularioRegistro() {
         </ModalFooter>
       </Modal>
 
-      {/* MODAL PARA EDITAR */}
-      <Modal isOpen={modalEditar} toggle={cerrarModalEditar} size="lg">
-        <ModalHeader toggle={cerrarModalEditar}>Editar Registro</ModalHeader>
+      <Modal isOpen={editModal} toggle={() => setEditModal(false)}>
+        <ModalHeader>Editar Registro</ModalHeader>
         <ModalBody>
-          <Form>
-            <Row>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="editNombre">Nombre *</Label>
-                  <Input
-                    id="editNombre"
-                    name="nombre"
-                    value={form.nombre}
-                    onChange={handleChange}
-                    placeholder="Ej: Juan"
-                  />
-                </FormGroup>
-              </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="editApellido">Apellido *</Label>
-                  <Input
-                    id="editApellido"
-                    name="apellido"
-                    value={form.apellido}
-                    onChange={handleChange}
-                    placeholder="Ej: Pérez"
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
-
-            <FormGroup>
-              <Label for="editEmail">Email *</Label>
-              <Input
-                id="editEmail"
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label for="editEdad">Edad *</Label>
-              <Input
-                id="editEdad"
-                name="edad"
-                type="number"
-                value={form.edad}
-                onChange={handleChange}
-              />
-            </FormGroup>
-
-            <FormGroup tag="fieldset">
-              <Label>Género</Label>
-              <FormGroup check>
+          {registroEditando && (
+            <Form>
+              <FormGroup>
+                <Label>Nombre</Label>
                 <Input
-                  name="genero"
-                  type="radio"
-                  checked={form.genero === 'masculino'}
-                  value="masculino"
-                  onChange={handleChange}
-                />{' '}
-                Masculino
+                  name="nombre"
+                  value={registroEditando.nombre}
+                  onChange={(e) =>
+                    setRegistroEditando({
+                      ...registroEditando,
+                      nombre: e.target.value,
+                    })
+                  }
+                />
               </FormGroup>
-              <FormGroup check>
+              <FormGroup>
+                <Label>Apellido</Label>
                 <Input
-                  name="genero"
-                  type="radio"
-                  checked={form.genero === 'femenino'}
-                  value="femenino"
-                  onChange={handleChange}
-                />{' '}
-                Femenino
+                  name="apellido"
+                  value={registroEditando.apellido}
+                  onChange={(e) =>
+                    setRegistroEditando({
+                      ...registroEditando,
+                      apellido: e.target.value,
+                    })
+                  }
+                />
               </FormGroup>
-            </FormGroup>
-
-            <FormGroup>
-              <Label for="editRol">Rol</Label>
-              <Input
-                id="editRol"
-                type="select"
-                name="rol"
-                value={form.rol}
-                onChange={handleChange}
-              >
-                <option value="">Selecciona un rol</option>
-                <option value="Admin">Administrador</option>
-                <option value="Usuario">Usuario</option>
-              </Input>
-            </FormGroup>
-
-            <FormGroup>
-              <Label for="editFecha">Fecha de registro *</Label>
-              <Input
-                id="editFecha"
-                type="date"
-                name="fecha"
-                value={form.fecha}
-                onChange={handleChange}
-                min={obtenerFechaMinima()}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label for="editNotas">Notas</Label>
-              <Input
-                id="editNotas"
-                type="textarea"
-                name="notas"
-                value={form.notas}
-                onChange={handleChange}
-                rows="3"
-              />
-            </FormGroup>
-          </Form>
+              <FormGroup>
+                <Label>Email</Label>
+                <Input
+                  name="email"
+                  value={registroEditando.email}
+                  onChange={(e) =>
+                    setRegistroEditando({
+                      ...registroEditando,
+                      email: e.target.value,
+                    })
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Contraseña</Label>
+                <Input
+                  type="text"
+                  name="password"
+                  value={registroEditando.password}
+                  onChange={(e) =>
+                    setRegistroEditando({
+                      ...registroEditando,
+                      password: e.target.value,
+                    })
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Edad</Label>
+                <Input
+                  name="edad"
+                  value={registroEditando.edad}
+                  onChange={(e) =>
+                    setRegistroEditando({
+                      ...registroEditando,
+                      edad: e.target.value,
+                    })
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Fecha Registro</Label>
+                <Input
+                  name="fecha"
+                  value={registroEditando.fecha}
+                  onChange={(e) =>
+                    setRegistroEditando({
+                      ...registroEditando,
+                      fecha: e.target.value,
+                    })
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Rol</Label>
+                <Input
+                  name="rol"
+                  value={registroEditando.rol}
+                  onChange={(e) =>
+                    setRegistroEditando({
+                      ...registroEditando,
+                      rol: e.target.value,
+                    })
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Género</Label>
+                <Input
+                  name="género"
+                  value={registroEditando.genero}
+                  onChange={(e) =>
+                    setRegistroEditando({
+                      ...registroEditando,
+                      genero: e.target.value,
+                    })
+                  }
+                />
+              </FormGroup>
+            </Form>
+          )}
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={guardarEdicion}>
-            Guardar Cambios
+          <Button
+            color="primary"
+            onClick={confirmarEdicion}
+            disabled={
+              registroEditando && !getValidation(registroEditando).nombre
+            }
+          >
+            Actualizar
           </Button>
-          <Button color="secondary" onClick={cerrarModalEditar}>
+          <Button color="secondary" onClick={() => setEditModal(false)}>
             Cancelar
           </Button>
         </ModalFooter>
       </Modal>
     </Container>
   );
-}
+};
+
+export default FormularioTravel;

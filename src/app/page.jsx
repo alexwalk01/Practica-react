@@ -10,6 +10,7 @@ import ModalEjemplo from '@/components/Modal';
 import TablaDatos from '@/components/TablaDatos';
 import FormularioRegistro from '@/formulario/page';
 import PracticasAPI from '@/apis/page';
+import CarouselVerde from '@/components/CarouselVerde';
 
 export default function Home() {
   return (
@@ -37,6 +38,10 @@ export default function Home() {
         <hr style={{ color: 'white' }} />
         <ToastAzul />
         <hr style={{ color: 'white' }} />
+
+        <CarouselVerde />
+        <hr style={{ color: 'white' }} />
+
         <ModalEjemplo />
         <hr style={{ color: 'white' }} />
         <TablaDatos />
