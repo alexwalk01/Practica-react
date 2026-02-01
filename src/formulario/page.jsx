@@ -68,7 +68,7 @@ const FormularioTravel = () => {
     setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
   };
 
-  // --- función nueva ---
+  //función tabla.
 
   const handleSave = () => {
     setLista([...lista, { ...form, id: Date.now() }]);
@@ -80,7 +80,7 @@ const FormularioTravel = () => {
   };
 
   const abrirEdicion = (registro) => {
-    setRegistroEditando({ ...registro });
+    setRegistroEditando({ ...registro }); //spread
     setEditModal(true);
   };
 
@@ -269,7 +269,7 @@ const FormularioTravel = () => {
         </Form>
       </div>
 
-      <h4 color="primary">Registros Guardados</h4>
+      <h4>Registros Guardados</h4>
       <Table striped bordered hover responsive>
         <thead className="table-dark">
           <tr>
@@ -309,7 +309,15 @@ const FormularioTravel = () => {
                 <Button
                   color="danger"
                   size="sm"
-                  onClick={() => handleEliminar(item.id)}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        '¿Seguro que quieres eliminar este registro?',
+                      )
+                    ) {
+                      handleEliminar(item.id);
+                    }
+                  }}
                   style={{ display: 'inline-flex', alignItems: 'center' }}
                 >
                   <FaTrashAlt className="me-1" /> Eliminar
